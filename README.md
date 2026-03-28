@@ -15,46 +15,18 @@ graph LR
 
 ## Install
 
+Clone the repo and open it in your agent:
+
 ```bash
 git clone https://github.com/michaelangeloio/ctx.git
 cd ctx
-cargo install --path crates/cli
 ```
 
-### Claude Code
+Then run the setup skill. It handles everything: building the binary, configuring session auto-registration, installing the plugin/skills, and adding agent instructions.
 
-Auto-registers sessions on start and adds `/ctx:ingest-session`, `/ctx:graph-context`, and `/ctx:setup` skills.
+**Claude Code:** `/setup` (from inside the ctx project directory)
 
-```bash
-claude plugin marketplace add .
-claude plugin install ctx@ctx --scope user
-```
-
-### Codex
-
-Install skills from inside Codex using the built-in installer:
-
-```
-/skill-installer --repo michaelangeloio/ctx --path plugin/skills/ingest-session plugin/skills/graph-context plugin/skills/setup
-```
-
-For auto-registration, add this to `~/.codex/session-info.sh` (after extracting `SESSION_ID`, `MODEL`, `CWD`):
-
-```bash
-if command -v ctx &>/dev/null && [ "$SESSION_ID" != "unknown" ]; then
-  if ! ctx find Session "session_id=$SESSION_ID" --quiet 2>/dev/null | grep -q .; then
-    ctx add Session session_id=$SESSION_ID title="Session $SESSION_ID" \
-      tool=codex model=$MODEL project_path=$CWD >/dev/null 2>&1 || true
-  fi
-fi
-```
-
-### Upgrade
-
-```bash
-cd ctx && git pull && cargo install --path crates/cli --force
-claude plugin update ctx@ctx
-```
+**Codex:** `/setup` (from inside the ctx project directory)
 
 ## Quick start
 
