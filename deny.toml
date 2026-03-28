@@ -1,0 +1,55 @@
+[advisories]
+vulnerability = "deny"
+unmaintained = "warn"
+
+[licenses]
+unlicensed = "deny"
+allow = [
+    "MIT",
+    "Apache-2.0",
+    "BSD-2-Clause",
+    "BSD-3-Clause",
+    "ISC",
+    "Zlib",
+    "MPL-2.0",
+    "CC0-1.0",
+    "Unicode-3.0",
+    "Unicode-DFS-2016",
+    "OpenSSL",
+    "BSL-1.0",
+]
+
+[[licenses.clarify]]
+name = "ctx-cli"
+expression = "MIT"
+license-files = []
+
+[[licenses.clarify]]
+name = "ctx-db"
+expression = "MIT"
+license-files = []
+
+[[licenses.clarify]]
+name = "ctx-schema"
+expression = "MIT"
+license-files = []
+
+[[licenses.clarify]]
+name = "ctx-search"
+expression = "MIT"
+license-files = []
+
+[[licenses.clarify]]
+name = "ctx-graph"
+expression = "MIT"
+license-files = []
+
+[bans]
+multiple-versions = "warn"
+wildcards = "allow"
+
+[sources]
+unknown-registry = "deny"
+unknown-git = "deny"
+allow-registry = ["https://github.com/rust-lang/crates.io-index"]
+allow-git = []

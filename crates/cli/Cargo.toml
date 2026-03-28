@@ -1,0 +1,19 @@
+[package]
+name = "ctx-cli"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[[bin]]
+name = "ctx"
+path = "src/main.rs"
+
+[lints]
+workspace = true
+
+[dependencies]
+ctx-db = { workspace = true }
+ctx-schema = { workspace = true }
+ctx-graph = { workspace = true }
+clap = { workspace = true }
+serde_json = { workspace = true }

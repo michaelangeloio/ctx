@@ -1,0 +1,16 @@
+[package]
+name = "ctx-integration-tests"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish = false
+
+[lints]
+workspace = true
+
+[dev-dependencies]
+tempfile = { workspace = true }
+
+[[test]]
+name = "cli"
+path = "tests/cli/main.rs"

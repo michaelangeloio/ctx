@@ -1,0 +1,16 @@
+[package]
+name = "ctx-graph"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[lints]
+workspace = true
+
+[dependencies]
+ctx-db = { workspace = true }
+ctx-schema = { workspace = true }
+duckdb = { workspace = true }
+
+[dev-dependencies]
+serde_json = { workspace = true }

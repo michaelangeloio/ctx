@@ -1,0 +1,57 @@
+[nodes.Session]
+session_id    = "string"
+title         = "string"
+summary       = "string?"
+tool          = "enum:claude,codex"
+model         = "string"
+message_count = "int?"
+project_path  = "string"
+git_branch    = "string?"
+worktree_path = "string?"
+filepath      = "string?"
+first_prompt  = "string?"
+
+[nodes.Project]
+name       = "string"
+path       = "string"
+remote_url = "string?"
+
+[nodes.Topic]
+name = "string"
+
+[nodes.Branch]
+name = "string"
+
+[nodes.Model]
+name     = "string"
+provider = "enum:anthropic,openai"
+
+[edges.IN_PROJECT]
+from = ["Session"]
+to   = ["Project"]
+
+[edges.ON_BRANCH]
+from = ["Session"]
+to   = ["Branch"]
+
+[edges.HAS_TOPIC]
+from = ["Session"]
+to   = ["Topic"]
+
+[edges.USED_MODEL]
+from = ["Session"]
+to   = ["Model"]
+
+[edges.CONTINUES]
+from = ["Session"]
+to   = ["Session"]
+reason = "string?"
+
+[edges.SPAWNED]
+from = ["Session"]
+to   = ["Session"]
+
+[edges.RELATED_TO]
+from = ["Session"]
+to   = ["Session"]
+reason = "string?"

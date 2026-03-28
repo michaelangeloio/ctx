@@ -1,0 +1,48 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/cli",
+    "crates/db",
+    "crates/schema",
+    "crates/graph",
+    "crates/integration-tests",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+license = "MIT"
+
+[workspace.lints.rust]
+unsafe_code = "forbid"
+
+[workspace.lints.clippy]
+all = { level = "warn", priority = -1 }
+
+[workspace.dependencies]
+# internal
+ctx-db = { path = "crates/db" }
+ctx-schema = { path = "crates/schema" }
+ctx-graph = { path = "crates/graph" }
+
+# core
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+thiserror = "2"
+chrono = { version = "0.4", features = ["serde"] }
+dirs = "6"
+
+# cli
+clap = { version = "4", features = ["derive", "env"] }
+
+# database
+duckdb = { version = "1", features = ["bundled"] }
+
+# schema
+toml = "1"
+
+# logging
+tracing = "0.1"
+
+# testing
+tempfile = "3"
