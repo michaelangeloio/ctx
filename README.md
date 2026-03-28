@@ -13,11 +13,52 @@ graph LR
     H1 -->|MENTIONS| A2[/"user_model.rb"/]
 ```
 
+## Install
+
+```bash
+git clone https://github.com/michaelangeloio/ctx.git
+cd ctx
+cargo install --path crates/cli
+```
+
+### Claude Code
+
+Auto-registers sessions on start and adds `/ctx:ingest-session`, `/ctx:graph-context`, and `/ctx:setup` skills.
+
+```bash
+claude plugin marketplace add .
+claude plugin install ctx@ctx --scope user
+```
+
+### Codex
+
+Install skills from inside Codex using the built-in installer:
+
+```
+/skill-installer --repo michaelangeloio/ctx --path plugin/skills/ingest-session plugin/skills/graph-context plugin/skills/setup
+```
+
+For auto-registration, add this to `~/.codex/session-info.sh` (after extracting `SESSION_ID`, `MODEL`, `CWD`):
+
+```bash
+if command -v ctx &>/dev/null && [ "$SESSION_ID" != "unknown" ]; then
+  if ! ctx find Session "session_id=$SESSION_ID" --quiet 2>/dev/null | grep -q .; then
+    ctx add Session session_id=$SESSION_ID title="Session $SESSION_ID" \
+      tool=codex model=$MODEL project_path=$CWD >/dev/null 2>&1 || true
+  fi
+fi
+```
+
+### Upgrade
+
+```bash
+cd ctx && git pull && cargo install --path crates/cli --force
+claude plugin update ctx@ctx
+```
+
 ## Quick start
 
 ```bash
-cargo install --path crates/cli
-
 # agent registers itself at session start
 ctx add Session session_id=$SID title="Fix auth bug" tool=claude model=opus project_path=/app
 
