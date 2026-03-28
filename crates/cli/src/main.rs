@@ -6,7 +6,7 @@ use clap::Parser;
 use commands::Commands;
 
 #[derive(Parser)]
-#[command(name = "ctx", about = "Local knowledge graph for AI coding sessions")]
+#[command(name = "ctx", about = "Local context graph for AI coding sessions")]
 struct Cli {
     #[command(subcommand)]
     command: Commands,

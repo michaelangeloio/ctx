@@ -1,0 +1,10 @@
+{
+  "name": "ctx",
+  "description": "Persistent memory for AI coding agents. Records sessions, highlights, topics, and artifacts in a local context graph.",
+  "version": "0.1.0",
+  "author": {
+    "name": "michaelangeloio"
+  },
+  "repository": "https://github.com/michaelangeloio/ctx",
+  "license": "MIT"
+}

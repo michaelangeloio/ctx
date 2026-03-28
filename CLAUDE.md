@@ -1,6 +1,6 @@
 # ctx
 
-Local knowledge graph CLI for AI coding sessions. Rust + DuckDB.
+Local context graph CLI for AI coding sessions. Rust + DuckDB.
 
 ## Layout
 

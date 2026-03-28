@@ -1,0 +1,13 @@
+{
+  "name": "ctx",
+  "owner": {
+    "name": "michaelangeloio"
+  },
+  "plugins": [
+    {
+      "name": "ctx",
+      "source": "./plugin",
+      "description": "Persistent memory for AI coding agents. Auto-registers sessions and provides skills for building a local context graph."
+    }
+  ]
+}

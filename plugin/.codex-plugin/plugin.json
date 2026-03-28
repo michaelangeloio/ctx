@@ -1,0 +1,6 @@
+{
+  "name": "ctx",
+  "version": "0.1.0",
+  "description": "Persistent memory for AI coding agents. Records sessions, highlights, topics, and artifacts in a local context graph.",
+  "skills": "./skills/"
+}

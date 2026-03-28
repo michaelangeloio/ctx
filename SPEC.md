@@ -1,4 +1,4 @@
-# ctx — local knowledge graph for AI coding sessions
+# ctx — local context graph for AI coding sessions
 
 ## Overview
 
@@ -738,7 +738,7 @@ Agents discover `ctx` through a skill file:
 ```markdown
 # .claude/skills/ctx/SKILL.md
 
-Use `ctx` to record and query your session knowledge graph.
+Use `ctx` to record and query your session context graph.
 
 ## When to use
 - At session start: register yourself with `ctx register`

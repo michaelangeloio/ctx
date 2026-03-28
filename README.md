@@ -1,6 +1,6 @@
 # ctx
 
-Meet `ctx`, your persistent memory for AI coding agents. A local knowledge graph where agents record what they worked on, what they learned, and how it all connects.
+Meet `ctx`, your persistent memory for AI coding agents. A local context graph where agents record what they worked on, what they learned, and how it all connects.
 
 ```mermaid
 graph LR
