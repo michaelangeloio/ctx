@@ -8,7 +8,7 @@ graph LR
     S1 -->|HAS_TOPIC| T1((auth))
     S1 -->|CONTINUES| S2["Session: Auth refactor"]
     S2 -->|HAS_TOPIC| T1
-    S2 -->|PRODUCED| A1[/"MR: Migrate to bcrypt"/]
+    S2 -->|PRODUCED| A1[/"PR: Migrate to bcrypt"/]
     T1 -.->|RELATES_TO| T2((security))
     H1 -->|MENTIONS| A2[/"user_model.rb"/]
 ```
@@ -87,7 +87,7 @@ Highlight (2 required, 1 optional)
 | Session | A coding session (Claude, Codex, etc.) |
 | Highlight | A key moment: discovery, decision, blocker, insight, or todo |
 | Topic | A concept (e.g. "auth", "database") |
-| Artifact | A file, MR, issue, or document |
+| Artifact | A file, PR, issue, or document |
 | Project | A codebase |
 | Branch | A git branch |
 

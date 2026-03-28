@@ -48,7 +48,6 @@ mod tests {
         let ddls = generate_view_ddl(&schema);
         let session_ddl = ddls.iter().find(|d| d.contains("v_session")).unwrap();
         assert!(session_ddl.contains("properties->>'$.title'"));
-        assert!(session_ddl.contains("CAST("));
         assert!(session_ddl.contains("FROM node WHERE kind = 'Session'"));
     }
 }

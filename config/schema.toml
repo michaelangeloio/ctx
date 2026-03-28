@@ -34,7 +34,7 @@ detail  = { type = "string?", hint = "Full context" }
 
 [nodes.Artifact]
 name   = { type = "string", hint = "Human-readable name" }
-kind   = { type = "enum:file,mr,issue,doc,snippet,epic,workitem" }
+kind   = { type = "enum:file,pr,issue,doc,snippet,epic,workitem", hint = "file=source file, pr=pull request, issue=ticket, doc=document, snippet=code block, epic=initiative, workitem=task" }
 detail = { type = "string?", hint = "What this artifact does or why it matters" }
 url    = { type = "string?", hint = "Web URL to the artifact (GitLab/GitHub link)" }
 path   = { type = "string?", hint = "Filesystem or repo-relative path" }
