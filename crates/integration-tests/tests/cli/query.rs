@@ -7,7 +7,7 @@ fn schema_overview_lists_all_types() {
     let ctx = Ctx::new();
     ctx.run(&["schema"])
         .success()
-        .stdout_has_line("Nodes: Branch, Model, Project, Session, Topic")
+        .stdout_has_line("Nodes: Artifact, Branch, Highlight, Model, Project, Session, Topic")
         .stdout_any_line("edges line has HAS_TOPIC", |l| l.contains("HAS_TOPIC") && l.contains("CONTINUES"));
 }
 
@@ -164,4 +164,125 @@ fn stats_shows_totals() {
         .success()
         .stdout_any_line("node total includes 6", |l| l.contains("Nodes:") && l.contains("6"))
         .stdout_any_line("edge total is 0", |l| l.contains("Edges:") && l.contains("0"));
+}
+
+// -- find filters -----------------------------------------------------------
+
+// Seed: 4 sessions (reuses seed_sessions) + 3 highlights
+
+fn seed_with_highlights(ctx: &Ctx) {
+    seed_sessions(ctx);
+    ctx.run(&["add", "Highlight", "content=Found the root cause", "kind=discovery"]).success();
+    ctx.run(&["add", "Highlight", "content=Switch to batch processing", "kind=decision"]).success();
+    ctx.run(&["add", "Highlight", "content=API rate limit blocks import", "kind=blocker"]).success();
+}
+
+#[test]
+fn filter_exact_match() {
+    let ctx = Ctx::new();
+    seed_sessions(&ctx);
+
+    ctx.run(&["find", "Session", "tool=codex"])
+        .success()
+        .stdout_line_count(1)
+        .stdout_contains("DB migration");
+}
+
+#[test]
+fn filter_multiple_conditions() {
+    let ctx = Ctx::new();
+    seed_sessions(&ctx);
+
+    ctx.run(&["find", "Session", "tool=claude,model=opus"])
+        .success()
+        .stdout_line_count(2)
+        .stdout_contains("Fix JWT")
+        .stdout_contains("Refactor auth")
+        .stdout_not_contains("Add rate limiting");
+}
+
+#[test]
+fn filter_contains() {
+    let ctx = Ctx::new();
+    seed_sessions(&ctx);
+
+    ctx.run(&["find", "Session", "title~rate"])
+        .success()
+        .stdout_line_count(1)
+        .stdout_contains("Add rate limiting");
+}
+
+#[test]
+fn filter_starts_with() {
+    let ctx = Ctx::new();
+    seed_sessions(&ctx);
+
+    ctx.run(&["find", "Session", "title^Fix"])
+        .success()
+        .stdout_line_count(1)
+        .stdout_contains("Fix JWT");
+}
+
+#[test]
+fn filter_not_equal() {
+    let ctx = Ctx::new();
+    seed_sessions(&ctx);
+
+    ctx.run(&["find", "Session", "tool!=codex"])
+        .success()
+        .stdout_line_count(3)
+        .stdout_not_contains("DB migration");
+}
+
+#[test]
+fn filter_by_highlight_kind() {
+    let ctx = Ctx::new();
+    seed_with_highlights(&ctx);
+
+    ctx.run(&["find", "Highlight", "kind=blocker"])
+        .success()
+        .stdout_line_count(1)
+        .stdout_contains("API rate limit");
+}
+
+#[test]
+fn filter_by_highlight_kind_discovery() {
+    let ctx = Ctx::new();
+    seed_with_highlights(&ctx);
+
+    ctx.run(&["find", "Highlight", "kind=discovery"])
+        .success()
+        .stdout_line_count(1)
+        .stdout_contains("root cause");
+}
+
+#[test]
+fn filter_no_match_returns_empty() {
+    let ctx = Ctx::new();
+    seed_sessions(&ctx);
+
+    ctx.run(&["find", "Session", "tool=vim"])
+        .success()
+        .stdout_line_count(0);
+}
+
+#[test]
+fn filter_with_order() {
+    let ctx = Ctx::new();
+    seed_sessions(&ctx);
+
+    ctx.run(&["find", "Session", "--order", "title:asc", "tool=claude"])
+        .success()
+        .stdout_line_count(3)
+        .stdout_line_at(0, "first alphabetically", |l| l.contains("Add rate limiting"));
+}
+
+#[test]
+fn filter_with_limit() {
+    let ctx = Ctx::new();
+    seed_sessions(&ctx);
+
+    ctx.run(&["find", "Session", "--limit", "2", "tool=claude"])
+        .success()
+        .stdout_line_count(2);
 }

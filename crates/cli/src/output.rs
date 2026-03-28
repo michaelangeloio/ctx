@@ -143,6 +143,19 @@ pub fn print_path(path: &PathResult) {
     println!("{}  ({hop_count} hops)", parts.join(" "));
 }
 
+fn print_edge_props(props: &std::collections::BTreeMap<String, ctx_schema::PropDef>) {
+    if props.is_empty() { return; }
+    for (name, prop) in props {
+        let type_str = match &prop.prop_type {
+            ctx_schema::PropType::Enum(vals) => format!("enum: {}", vals.join(", ")),
+            other => format!("{:?}", other).to_lowercase(),
+        };
+        let suffix = if prop.required { "" } else { "?" };
+        let hint = prop.hint.as_deref().map(|h| format!("  — {h}")).unwrap_or_default();
+        print!("\n    {name}: {type_str}{suffix}{hint}");
+    }
+}
+
 pub fn print_schema_overview(schema: &Schema) {
     let nodes: Vec<&str> = schema.nodes.keys().map(|s| s.as_str()).collect();
     let edges: Vec<&str> = schema.edges.keys().map(|s| s.as_str()).collect();
@@ -156,16 +169,22 @@ pub fn print_kind_schema(schema: &Schema, kind: &str) {
         let opt_count = node_def.optional_props().count();
         println!("{kind} ({req_count} required, {opt_count} optional)");
         for (name, prop) in &node_def.properties {
-            let type_str = format!("{:?}", prop.prop_type).to_lowercase();
+            let type_str = match &prop.prop_type {
+                ctx_schema::PropType::Enum(vals) => format!("enum: {}", vals.join(", ")),
+                other => format!("{:?}", other).to_lowercase(),
+            };
             let suffix = if prop.required { "" } else { "?" };
-            println!("  {name:<20} {type_str}{suffix}");
+            let hint = prop.hint.as_deref().map(|h| format!("  — {h}")).unwrap_or_default();
+            println!("  {name:<20} {type_str}{suffix}{hint}");
         }
 
         println!();
         for (edge_name, edge_def) in &schema.edges {
             if edge_def.from.iter().any(|f| f == kind) {
                 let targets = edge_def.to.join(", ");
-                println!("  edges out: {edge_name} → {targets}");
+                print!("  edges out: {edge_name} → {targets}");
+                print_edge_props(&edge_def.properties);
+                println!();
             }
             if edge_def.to.iter().any(|t| t == kind) {
                 let sources = edge_def.from.join(", ");

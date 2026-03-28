@@ -34,10 +34,7 @@ fn parse_nodes(val: Option<&toml::Value>) -> Result<BTreeMap<String, NodeDef>, S
 
         let mut properties = BTreeMap::new();
         for (prop_name, type_val) in props_table {
-            let type_str = type_val
-                .as_str()
-                .ok_or_else(|| SchemaError::Parse(format!("{name}.{prop_name} must be a string")))?;
-            properties.insert(prop_name.clone(), parse_prop_def(type_str)?);
+            properties.insert(prop_name.clone(), parse_prop_value(type_val, &format!("{name}.{prop_name}"))?);
         }
 
         nodes.insert(
@@ -84,10 +81,10 @@ fn parse_edges(
             if key == "from" || key == "to" {
                 continue;
             }
-            let type_str = val
-                .as_str()
-                .ok_or_else(|| SchemaError::Parse(format!("{name}.{key} must be a string")))?;
-            properties.insert(key.clone(), parse_prop_def(type_str)?);
+            // Edge properties can be strings or tables (same as node properties)
+            // but skip array values (those are from/to which we already handled)
+            if val.is_array() { continue; }
+            properties.insert(key.clone(), parse_prop_value(val, &format!("{name}.{key}"))?);
         }
 
         edges.insert(
@@ -122,7 +119,24 @@ fn parse_string_array(
         .collect()
 }
 
-fn parse_prop_def(type_str: &str) -> Result<PropDef, SchemaError> {
+/// Parse a property value — supports both formats:
+///   name = "string"
+///   name = { type = "string", hint = "how to fill this in" }
+fn parse_prop_value(val: &toml::Value, context: &str) -> Result<PropDef, SchemaError> {
+    match val {
+        toml::Value::String(s) => parse_type_str(s, None),
+        toml::Value::Table(t) => {
+            let type_str = t.get("type")
+                .and_then(|v| v.as_str())
+                .ok_or_else(|| SchemaError::Parse(format!("{context}: table property must have a 'type' field")))?;
+            let hint = t.get("hint").and_then(|v| v.as_str()).map(|s| s.to_string());
+            parse_type_str(type_str, hint)
+        }
+        _ => Err(SchemaError::Parse(format!("{context}: must be a string or table"))),
+    }
+}
+
+fn parse_type_str(type_str: &str, hint: Option<String>) -> Result<PropDef, SchemaError> {
     let (base, required) = if let Some(stripped) = type_str.strip_suffix('?') {
         (stripped, false)
     } else {
@@ -146,7 +160,7 @@ fn parse_prop_def(type_str: &str) -> Result<PropDef, SchemaError> {
         }
     };
 
-    Ok(PropDef { prop_type, required })
+    Ok(PropDef { prop_type, required, hint })
 }
 
 #[cfg(test)]

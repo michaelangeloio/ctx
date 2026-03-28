@@ -40,6 +40,7 @@ pub struct EdgeDef {
 pub struct PropDef {
     pub prop_type: PropType,
     pub required: bool,
+    pub hint: Option<String>,
 }
 
 #[derive(Debug, Clone, PartialEq)]

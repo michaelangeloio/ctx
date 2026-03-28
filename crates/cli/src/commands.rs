@@ -192,14 +192,15 @@ pub fn run(db: &Database, cmd: Commands) -> Result<(), DbError> {
         }
         Commands::Find {
             kind,
-            filters: _,
+            filters,
             limit,
             order,
             full,
             json,
             quiet,
         } => {
-            let nodes = db.list_nodes_ordered(&kind, limit, order.as_deref())?;
+            let filter_exprs = parse::parse_filters(&filters)?;
+            let nodes = db.list_nodes_filtered(&kind, limit, order.as_deref(), &filter_exprs)?;
             let mode = if json {
                 OutputMode::Json
             } else if quiet {

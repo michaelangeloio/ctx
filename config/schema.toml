@@ -1,30 +1,43 @@
 [nodes.Session]
-session_id    = "string"
-title         = "string"
-summary       = "string?"
-tool          = "enum:claude,codex"
-model         = "string"
-message_count = "int?"
-project_path  = "string"
-git_branch    = "string?"
-worktree_path = "string?"
-filepath      = "string?"
-first_prompt  = "string?"
+session_id    = { type = "string", hint = "full UUID from the AI tool (e.g. Claude/Codex session ID)" }
+title         = { type = "string", hint = "Short title" }
+summary       = { type = "string?", hint = "1-2 sentence overview" }
+detail        = { type = "string?", hint = "Longer narrative of the session" }
+tool          = { type = "enum:claude,codex" }
+model         = { type = "string" }
+project_path  = { type = "string", hint = "Absolute path to the project directory" }
+git_branch    = { type = "string?", hint = "Git branch active during the session" }
+worktree_path = { type = "string?", hint = "Path to the git worktree" }
+filepath      = { type = "string?", hint = "Path to the session transcript file" }
+first_prompt  = { type = "string?", hint = "The user's first message" }
 
 [nodes.Project]
-name       = "string"
-path       = "string"
-remote_url = "string?"
+name       = { type = "string", hint = "Human-readable project name" }
+path       = { type = "string", hint = "Absolute filesystem path to the project root" }
+remote_url = { type = "string?", hint = "Git remote URL" }
 
 [nodes.Topic]
-name = "string"
+name        = { type = "string", hint = "Short kebab-case topic name" }
+description = { type = "string?", hint = "What this topic means in the context of the project" }
 
 [nodes.Branch]
-name = "string"
+name = { type = "string" }
 
 [nodes.Model]
-name     = "string"
-provider = "enum:anthropic,openai"
+name     = { type = "string" }
+provider = { type = "enum:anthropic,openai" }
+
+[nodes.Highlight]
+content = { type = "string" }
+kind    = { type = "enum:discovery,decision,blocker,insight,todo,turning_point" }
+detail  = { type = "string?", hint = "Full context" }
+
+[nodes.Artifact]
+name   = { type = "string", hint = "Human-readable name" }
+kind   = { type = "enum:file,mr,issue,doc,snippet,epic,workitem" }
+detail = { type = "string?", hint = "What this artifact does or why it matters" }
+url    = { type = "string?", hint = "Web URL to the artifact (GitLab/GitHub link)" }
+path   = { type = "string?", hint = "Filesystem or repo-relative path" }
 
 [edges.IN_PROJECT]
 from = ["Session"]
@@ -35,7 +48,7 @@ from = ["Session"]
 to   = ["Branch"]
 
 [edges.HAS_TOPIC]
-from = ["Session"]
+from = ["Session", "Highlight"]
 to   = ["Topic"]
 
 [edges.USED_MODEL]
@@ -45,13 +58,30 @@ to   = ["Model"]
 [edges.CONTINUES]
 from = ["Session"]
 to   = ["Session"]
-reason = "string?"
+reason = { type = "string?", hint = "Why this session continues the other (e.g. same bug, follow-up)" }
 
 [edges.SPAWNED]
 from = ["Session"]
 to   = ["Session"]
 
 [edges.RELATED_TO]
+from = ["Session", "Topic"]
+to   = ["Session", "Topic"]
+reason = { type = "string?", hint = "How the two are related" }
+
+[edges.HAS_HIGHLIGHT]
 from = ["Session"]
-to   = ["Session"]
-reason = "string?"
+to   = ["Highlight"]
+
+[edges.MENTIONS]
+from = ["Session", "Highlight"]
+to   = ["Artifact"]
+
+[edges.PRODUCED]
+from = ["Session"]
+to   = ["Artifact"]
+
+[edges.REFERENCES]
+from = ["Highlight"]
+to   = ["Session", "Highlight"]
+context = { type = "string?", hint = "What aspect of the target is being referenced" }

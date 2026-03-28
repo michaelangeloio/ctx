@@ -14,6 +14,7 @@ impl Node {
         self.properties
             .get("title")
             .or_else(|| self.properties.get("name"))
+            .or_else(|| self.properties.get("content"))
             .and_then(|v| v.as_str())
             .unwrap_or("")
     }

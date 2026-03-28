@@ -91,32 +91,39 @@ impl Database {
     }
 
     pub fn list_nodes(&self, kind: &str, limit: usize) -> Result<Vec<Node>, DbError> {
-        self.list_nodes_ordered(kind, limit, None)
+        self.list_nodes_filtered(kind, limit, None, &[])
     }
 
-    pub fn list_nodes_ordered(&self, kind: &str, limit: usize, order: Option<&str>) -> Result<Vec<Node>, DbError> {
+    pub fn list_nodes_filtered(
+        &self,
+        kind: &str,
+        limit: usize,
+        order: Option<&str>,
+        filters: &[Expr],
+    ) -> Result<Vec<Node>, DbError> {
         if !self.schema.nodes.contains_key(kind) {
             return Err(DbError::Validation(ctx_schema::ValidationError::UnknownKind(kind.into())));
         }
 
-        // Parse order spec like "created_at:desc" or "title:asc"
         let (order_col, order_desc) = match order {
             Some(spec) => {
                 let (col, dir) = spec.split_once(':').unwrap_or((spec, "desc"));
                 let col = sql::require_ident(col)?;
                 let desc = dir.eq_ignore_ascii_case("desc");
-                // Use the view column via properties extraction
                 (format!("n.properties->>'$.{col}'"), desc)
             }
             None => ("n.id".to_string(), true),
         };
 
-        let q = Query::from(TableRef::scan("node", "n"))
+        let mut q = Query::from(TableRef::scan("node", "n"))
             .cols("n", NODE_COLS)
-            .where_and(Expr::eq(Expr::col("n", "kind"), Expr::Str(kind.into())))
-            .order(&order_col, order_desc)
-            .limit(limit as i64)
-            .build();
+            .where_and(Expr::eq(Expr::col("n", "kind"), Expr::Str(kind.into())));
+
+        for filter in filters {
+            q = q.where_and(filter.clone());
+        }
+
+        let q = q.order(&order_col, order_desc).limit(limit as i64).build();
 
         let mut stmt = self.conn.prepare(q.sql())?;
         let rows = stmt.query_map(q.param_refs().as_slice(), Node::from_row)?;
