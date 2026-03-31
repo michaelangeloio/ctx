@@ -2,3 +2,4 @@
 *.db
 *.duckdb
 *.parquet
+.env
