@@ -34,6 +34,7 @@ dirs = "6"
 
 # cli
 clap = { version = "4", features = ["derive", "env"] }
+gethostname = "1"
 
 # database
 duckdb = { version = "1", features = ["bundled"] }

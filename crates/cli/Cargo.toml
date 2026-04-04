@@ -16,4 +16,5 @@ ctx-db = { workspace = true }
 ctx-schema = { workspace = true }
 ctx-graph = { workspace = true }
 clap = { workspace = true }
+gethostname = { workspace = true }
 serde_json = { workspace = true }

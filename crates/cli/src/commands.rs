@@ -115,6 +115,43 @@ pub enum Commands {
     Kinds,
     /// Database statistics
     Stats,
+    /// Sync ctx graph to/from GCS
+    Sync {
+        #[command(subcommand)]
+        action: SyncAction,
+    },
+}
+
+#[derive(Subcommand)]
+pub enum SyncAction {
+    /// Export local graph to GCS as Parquet
+    Push {
+        /// GCS bucket name
+        #[arg(long, default_value = "arivera-ctx-sync")]
+        bucket: String,
+        /// Namespace (machine identifier)
+        #[arg(long)]
+        name: Option<String>,
+    },
+    /// Import + merge graph data from a GCS namespace
+    Pull {
+        /// GCS bucket name
+        #[arg(long, default_value = "arivera-ctx-sync")]
+        bucket: String,
+        /// Namespace to pull from (e.g. "mac", "vm-frontend")
+        name: String,
+    },
+    /// Upload a specific .db file to GCS (e.g. a backup)
+    Seed {
+        /// Path to the .db file to upload
+        db_path: String,
+        /// GCS bucket name
+        #[arg(long, default_value = "arivera-ctx-sync")]
+        bucket: String,
+        /// Namespace to upload as
+        #[arg(long)]
+        name: Option<String>,
+    },
 }
 
 pub fn run(db: &Database, cmd: Commands) -> Result<(), DbError> {
@@ -304,6 +341,29 @@ pub fn run(db: &Database, cmd: Commands) -> Result<(), DbError> {
                 .join(", ");
             println!("Nodes: {node_count}  ({kinds_str})");
             println!("Edges: {edge_count}");
+        }
+        Commands::Sync { action } => {
+            match action {
+                SyncAction::Push { bucket, name } => {
+                    let ns = name.unwrap_or_else(|| gethostname::gethostname().to_string_lossy().into_owned());
+                    println!("Exporting to gs://{bucket}/ctx/{ns}/...");
+                    let stats = ctx_db::export_to_gcs(db, &bucket, &ns)?;
+                    println!("Exported {} nodes, {} edges", stats.nodes_exported, stats.edges_exported);
+                }
+                SyncAction::Pull { bucket, name } => {
+                    println!("Importing from gs://{bucket}/ctx/{name}/...");
+                    let stats = ctx_db::import_and_merge(db, &bucket, &name)?;
+                    println!("Added {} nodes, {} edges", stats.nodes_added, stats.edges_added);
+                }
+                SyncAction::Seed { db_path, bucket, name } => {
+                    let ns = name.unwrap_or_else(|| gethostname::gethostname().to_string_lossy().into_owned());
+                    println!("Seeding from {db_path} to gs://{bucket}/ctx/{ns}/...");
+                    let schema = db.schema().clone();
+                    let seed_db = ctx_db::Database::open(std::path::Path::new(&db_path), schema)?;
+                    let stats = ctx_db::export_to_gcs(&seed_db, &bucket, &ns)?;
+                    println!("Exported {} nodes, {} edges", stats.nodes_exported, stats.edges_exported);
+                }
+            }
         }
     }
     Ok(())

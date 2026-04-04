@@ -3,11 +3,13 @@ mod crud;
 mod retry;
 mod schema_registry;
 pub mod sql;
+pub mod sync;
 mod types;
 
 pub use conn::Database;
 pub use crud::{CreateEdgeParams, CreateNodeParams};
 pub use retry::RetryConfig;
+pub use sync::{export_to_gcs, import_and_merge, SyncStats, MergeStats};
 pub use types::{Edge, Node};
 
 #[derive(Debug, thiserror::Error)]
